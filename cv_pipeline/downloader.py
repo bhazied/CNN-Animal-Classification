@@ -18,7 +18,7 @@ class Downloader():
         if(not os.path.isfile(file_path)):
             response = requests.get(self.dataset_url, stream=True)
             size = int(response.headers.get('content-length', 0))
-            with open(self.npz_path, 'wb') as file, tqdm(
+            with open(file_path, 'wb') as file, tqdm(
                 desc=self.npz_path,
                 total=  size,
                 unit='iB',
@@ -37,7 +37,8 @@ class Downloader():
             print(f"Dataset already exists in {self.extract_dir}, skipping download.")
 
     def get_data(self):
-        with np.load(self.npz_path, allow_pickle=True) as data:
+        file_path = Path(self.extract_dir) / self.npz_path
+        with np.load(file_path, allow_pickle=True) as data:
             images = data["X"]
             labels = data["y"]
             classes = list(data["class_names"])

@@ -7,12 +7,6 @@ class ClassifyModel(nn.Module):
     def __init__(self, num_classes = 10):
         super(ClassifyModel, self).__init__()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        # self.features = nn.Sequential(
-        #     nn.Conv2d(in_chennels = 3, out_channels = 32, kernel_size=3, padding=1),
-        #     nn.ReLU(),
-        #     nn.MaxPool2d(kernel_size=2, stride=2),
-        #     nn.Flatten()
-        # )
         self.features = nn.Sequential(
             ConvBlock(3, 16), # MaxPool2d (2,2) 28 --> 14
             ConvBlock(16, 32) # MaxPool2d (2,2) 14 --> 7
@@ -33,23 +27,22 @@ class ClassifyModel(nn.Module):
     def fit(self, train_loader: DataLoader, eval_loader: DataLoader, loss_function, optimizer, num_epochs:int = 5):
         self.to(self.device)
         train_losses = []
-        val_losses = []
-        val_accuracies = []
-        self.train(train_loader, loss_function, optimizer)
+        eval_losses = []
+        eval_accuracies = []
         for epoch in range(num_epochs):
-           epoch_train_loss = self.train(train_loader, loss_function, optimizer)
+           self.train()
+           epoch_train_loss = self.run_train(train_loader = train_loader, loss_function = loss_function, optimizer = optimizer)
            train_losses.append(epoch_train_loss)
            self.eval()
-           val_loss, val_accuracy = self.evaluate(eval_loader, loss_function)
-           val_losses.append(val_loss)
-           val_accuracies.append(val_accuracy)
-           print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {epoch_train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.2f}%")
-        return [train_losses, val_losses, val_accuracies]
+           eval_loss, eval_accuracy = self.evaluate(eval_loader, loss_function)
+           eval_losses.append(eval_loss)
+           eval_accuracies.append(eval_accuracy)
+           print(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {epoch_train_loss:.4f}, Val Loss: {eval_loss:.4f}, Val Accuracy: {eval_accuracy:.2f}%")
+        return [train_losses, eval_losses, eval_accuracies]
 
-    def train(self, train_loader: DataLoader, loss_function, optimizer):
+    def run_train(self, train_loader: DataLoader, loss_function, optimizer):
         running_loss = 0.0
-        for i in range(len(train_loader)):
-            inputs, labels = next(iter(train_loader))
+        for inputs, labels in train_loader:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
             optimizer.zero_grad()
@@ -67,17 +60,21 @@ class ClassifyModel(nn.Module):
         total = 0
         with torch.no_grad():
            for inputs, labels in eval_loader:
+               i = 1
                inputs = inputs.to(self.device)
                labels = labels.to(self.device)
                outputs = self.forward(inputs)
                loss = loss_function(outputs, labels)
                running_loss += loss.item() * inputs.size(0)
+               print (f"loss for batch {i}:  { loss.item()}")
                _, prediected = torch.max(outputs, 1)
                total += labels.size(0)
                correct += (prediected == labels).sum().item()
-        epoch_loss = running_loss / len(eval_loader.dataset)
-        epoch_accuracy = 100 *correct / total
-        return epoch_loss, epoch_accuracy
+               i+=1
+        print (f"running loss {running_loss} et lenght {len(eval_loader.dataset)}")
+        eval_loss = running_loss / len(eval_loader.dataset)
+        eval_accuracy = 100 * correct / total
+        return eval_loss, eval_accuracy
            
 
 
