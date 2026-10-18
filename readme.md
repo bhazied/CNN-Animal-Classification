@@ -1,16 +1,22 @@
 # CNN Animal Classification
 
-A deep learning project using **PyTorch** to build a Convolutional Neural Network (CNN) pipeline designed to classify animals. This repository implements data loading, custom preprocessing, modular architecture design, and a complete training/testing pipeline.
+A modular deep learning project built with **PyTorch** to construct, train, and evaluate a Convolutional Neural Network (CNN) pipeline for animal image classification.
 
 ## 📁 Repository Structure
 
 ```text
-├── cv_pipeline/            # Custom computer vision pipeline module (Data loaders, Models)
-├── animal_mnist.npz        # Compressed NumPy array containing the animal image dataset
-├── helpers.py              # Utility functions for visualization, logging, or metric tracking
-├── main.py                 # Main orchestration script for training and evaluation
-├── requirements.txt        # Project package dependencies
-└── .gitignore              # Git ignore file
+├── cv_pipeline/              # Core computer vision engineering modules
+│   ├── __init__.py           # Makes cv_pipeline a Python package
+│   ├── dataset.py            # Extracts .npz arrays & creates PyTorch Custom Dataset instances
+│   ├── dataloader.py         # Configures data batching, shuffling, and worker threads
+│   ├── transforms.py         # Handles data augmentation (resizing, normalization, flips)
+│   ├── models.py             # Defines the modular CNN model architectures
+│   └── engine.py             # Contains train_step, test_step, and loop orchestrations
+├── animal_mnist.npz          # Compressed NumPy array containing the animal image data
+├── helpers.py                # Utility functions for plotting metrics and handling logs
+├── main.py                   # Main orchestration script to run execution workflows
+├── requirements.txt          # Python project package dependencies
+└── .gitignore                # Git tracked exceptions
 ```
 
 ## 🚀 Getting Started
@@ -18,7 +24,7 @@ A deep learning project using **PyTorch** to build a Convolutional Neural Networ
 Follow these steps to set up and run the animal classification pipeline locally.
 
 ### 1. Prerequisites
-Ensure you have Python 3.8+ installed on your system. 
+Ensure you have Python 3.8+ installed on your system.
 
 ### 2. Clone the Repository
 ```bash
@@ -26,8 +32,8 @@ git clone https://github.com
 cd CNN-Animal-Classification
 ```
 
-### 3. Install Dependencies
-It is highly recommended to use a virtual environment:
+### 3. Setup Environment & Install Dependencies
+It is highly recommended to use an isolated Python virtual environment:
 
 ```bash
 # Create a virtual environment
@@ -43,20 +49,33 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-*Note: Ensure your `requirements.txt` includes core packages like `torch`, `torchvision`, `numpy`, and `matplotlib`.*
-
-### 4. Running the Pipeline
-To start processing the dataset, training the CNN model, and running evaluations, execute the main driver script:
+### 4. Run the Classification Pipeline
+To unpack the dataset, initialize the data loaders, build the model network, and start training, run:
 
 ```bash
 python main.py
 ```
 
-## 🛠️ Pipeline Details
+## 🛠️ Modular Pipeline Architecture (`cv_pipeline/`)
 
-* **Data Management (`animal_mnist.npz`)**: The dataset is packaged into a compact `.npz` format. The custom data pipeline inside `cv_pipeline/` handles unpacking, parsing, applying PyTorch tensor transforms, and wrapping tensors into manageable batches via `DataLoader`.
-* **Modular CNN Architecture**: The networks are modularly separated to easily tweak convolutional layers, activation functions (ReLU), pooling mechanisms, and fully connected linear layers.
-* **Orchestration (`main.py` & `helpers.py`)**: Manages the forward passes, loss computation, backpropagation optimization steps, and utilizes helper functions to evaluate validation accuracy or display performance graphs.
+To keep the deep learning code scalable and maintainable, the components inside the `cv_pipeline/` directory are completely decoupled:
+
+### 🔹 Data Ingestion (`dataset.py` & `dataloader.py`)
+* Parses raw data arrays from `animal_mnist.npz`.
+* Implements a custom PyTorch class subclassing `torch.utils.data.Dataset` to fetch items lazily.
+* Wraps datasets inside `torch.utils.data.DataLoader` to handle automatic mini-batch processing, multi-threaded worker loading, and dataset shuffling for training cycles.
+
+### 🔹 Augmentation & Preprocessing (`transforms.py`)
+* Applies essential validation mapping like Tensor casting (`ToTensor()`) and RGB channel scaling normalization.
+* Houses configurable image augmentation pipelines (e.g., random cropping, horizontal flipping, or color jittering) to improve model generalization and reduce overfitting.
+
+### 🔹 Architecture Design (`models.py`)
+* Builds clean, flexible convolutional neural networks subclassing `torch.nn.Module`.
+* Separates individual architectural blocks (Convolutional feature extractors, non-linear activation layers like `ReLU`, downsampling `MaxPool2d` layers, and Fully-Connected dense classifier heads).
+
+### 🔹 Execution Engine (`engine.py`)
+* Abstracts the core execution phases of machine learning tasks.
+* Implements the forward pass, loss calculation (e.g., CrossEntropyLoss), backpropagation tracking, and weight optimization steps using optimizers like Adam or SGD.
 
 ## 📜 License
 This project is open-source and available under the MIT License.
