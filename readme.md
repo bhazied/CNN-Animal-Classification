@@ -73,9 +73,6 @@ To keep the deep learning code scalable and maintainable, the components inside 
 * Builds clean, flexible convolutional neural networks subclassing `torch.nn.Module`.
 * Separates individual architectural blocks (Convolutional feature extractors, non-linear activation layers like `ReLU`, downsampling `MaxPool2d` layers, and Fully-Connected dense classifier heads).
 
-### 🔹 Execution Engine (`engine.py`)
-* Abstracts the core execution phases of machine learning tasks.
-* Implements the forward pass, loss calculation (e.g., CrossEntropyLoss), backpropagation tracking, and weight optimization steps using optimizers like Adam or SGD.
 
 ## 📜 License
 This project is open-source and available under the MIT License.
